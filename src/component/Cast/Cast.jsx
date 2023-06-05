@@ -4,22 +4,23 @@ import getDataFilm from "../../fetch/getDataFilm";
 import { Section } from "../MoveDetails/MoveDetails.styled";
 import { Container } from "../FilmLayout/FilmLayout.styled";
 import { Actor, ActorList, ActorPoster } from "./Cast.styled";
+import { useFilm } from "../hooks/useContext";
 
 const Cast = () => {
-
     const [state, setState] = useState([])
-
     const [response, setResponse] = useState('')
-
-
     const { filmId } = useParams()
+    const { setIsloading } = useFilm()
     useEffect(() => {
+        setIsloading(true)
         getDataFilm(`movie/${filmId}/credits`)
             .then(({ cast }) => {
                 setState(cast.slice(0, 5))
-            }).catch(err => setResponse(err.toString()))
-        console.log(cast)
+            })
+            .catch(err => setResponse(err.toString()))
+            .finally(() => setIsloading(false))
     }, [])
+
     const cast =
         (!response ? (<Section>
             <Container>

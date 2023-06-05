@@ -4,19 +4,24 @@ import getDataFilm from "../../fetch/getDataFilm";
 import { Section } from "../MoveDetails/MoveDetails.styled";
 import { Container } from "../FilmLayout/FilmLayout.styled";
 import { Review, ReviewsList } from "./Reviews.styled";
+import { useFilm } from "../hooks/useContext";
 
 
 const Reviews = () => {
     const [state, setState] = useState([])
     const [responseErr, setResponseErr] = useState('')
     const { filmId } = useParams()
+    const { setIsloading } = useFilm()
 
     useEffect(() => {
+        setIsloading(true)
         getDataFilm(`movie/${filmId}/reviews`)
             .then(({ results }) => {
                 console.log(results)
                 setState(results)
-            }).catch(err => setResponseErr(err.toString()))
+            })
+            .catch(err => setResponseErr(err.toString()))
+            .finally(() => setIsloading(false))
 
     }, [])
 
@@ -39,7 +44,8 @@ const Reviews = () => {
     const reviews = (
         <>
             {state.length === 0 && <div>reviews not found</div>}
-            {!responseErr && state.length !== 0 ? review : <div>{responseErr}</div>}
+            {responseErr && <div>{responseErr}</div>}
+            {state.length !== 0 && review}
         </>);
 
     return reviews;
