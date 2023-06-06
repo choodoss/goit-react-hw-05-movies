@@ -29,7 +29,7 @@ const MoveDetails = () => {
                 setImage(`https://image.tmdb.org/t/p/w500${poster_path}`)
                 setScore(`${(10 * vote_average).toFixed(0)}%`)
             }).catch(err => setResponse(err.toString())).finally(() => setIsloading(false))
-    }, [])
+    }, [filmId])
 
     const moveDetails =
         <>
