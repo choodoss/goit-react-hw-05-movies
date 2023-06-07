@@ -8,9 +8,8 @@ const options = {
     }
 };
 
-const getDataFilm = (param) => {
-
-    return fetch(`${URL}${param}?language=en-US`, options)
+const getDataFilm = async (param) => {
+    return fetch(`${URL}${param}${param.includes('?') ? '&language=en-US' : '?language=en-US'}`, options)
         .then(res => {
             if (!res.ok) {
                 throw new Error(res.status);

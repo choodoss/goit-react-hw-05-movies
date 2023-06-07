@@ -1,16 +1,8 @@
 import { Outlet } from 'react-router-dom';
 import { Container, Header, LinkList, LinkItem, LinkPage } from './FilmLayout.styled'
-import { Audio } from 'react-loader-spinner'
+import Loader from '../Loader/Loader';
+import { Suspense } from 'react';
 
-<Audio
-    height="80"
-    width="80"
-    radius="9"
-    color='green'
-    ariaLabel='three-dots-loading'
-    wrapperStyle
-    wrapperClass
-/>
 
 const FilmLayout = () => {
     const filmLayout =
@@ -26,7 +18,12 @@ const FilmLayout = () => {
                 </Container>
             </Header>
             <main>
-                <Outlet />
+                <Container>
+                    <Suspense fallback={<Loader isLoad={true} />}>
+                        <Loader />
+                        <Outlet />
+                    </Suspense>
+                </Container>
             </main>
 
         </>
@@ -34,4 +31,6 @@ const FilmLayout = () => {
 };
 
 export default FilmLayout;
+
+
 

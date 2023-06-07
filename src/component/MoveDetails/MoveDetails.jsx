@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
-import { useParams, Outlet } from "react-router-dom";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { useParams, Outlet, useLocation } from "react-router-dom";
 import getDataFilm from "../../fetch/getDataFilm";
 import { FaLongArrowAltLeft } from 'react-icons/fa';
-import { Section, ButtonBack, FilmCard, FilmPoster, Link } from "./MoveDetails.styled";
+import { Section, LinkButton, FilmCard, FilmPoster, Link } from "./MoveDetails.styled";
 import { Container } from "../FilmLayout/FilmLayout.styled";
+import { useFilm } from '../hooks/useContext';
+import Loader from "../Loader/Loader";
 
 const MoveDetails = () => {
     const [image, setImage] = useState('')
@@ -12,26 +14,29 @@ const MoveDetails = () => {
     const [overview, setOverview] = useState('')
     const [genres, setGenres] = useState([])
     const [response, setResponse] = useState('')
-
-
+    const { setIsloading } = useFilm()
     const { filmId } = useParams()
+    const location = useLocation();
+    const prevLocation = useRef(location.state?.from ?? '/move')
+
     useEffect(() => {
+        setIsloading(true)
         getDataFilm(`movie/${filmId}`)
-            .then(res => {
-                setTitle(`${res.original_title}`)
-                setGenres(res.genres.map(g => g.name).join(', '))
-                setOverview(`${res.overview}`)
-                setImage(`https://image.tmdb.org/t/p/w500${res.poster_path}`)
-                setScore(`${(10 * res.vote_average).toFixed(0)}%`)
-            }).catch(err => setResponse(err.toString()))
-    }, [])
+            .then(({ original_title, genres, vote_average, poster_path, overview }) => {
+                setTitle(`${original_title}`)
+                setGenres(genres.map(g => g.name).join(', '))
+                setOverview(`${overview}`)
+                setImage(`https://image.tmdb.org/t/p/w500${poster_path}`)
+                setScore(`${(10 * vote_average).toFixed(0)}%`)
+            }).catch(err => setResponse(err.toString())).finally(() => setIsloading(false))
+    }, [filmId])
 
     const moveDetails =
         <>
             {!response &&
                 <Section>
                     <Container>
-                        <ButtonBack><FaLongArrowAltLeft /> go back</ButtonBack>
+                        <LinkButton to={prevLocation.current}><FaLongArrowAltLeft /> go back</LinkButton>
                         <FilmCard>
                             <FilmPoster src={image} alt={title} />
                             <div>
@@ -45,17 +50,20 @@ const MoveDetails = () => {
                         </FilmCard>
                     </Container>
                 </Section>}
-            {!response && <Section>
-                <Container>
-                    <p>Additional information</p>
-                    <ul>
-                        <li><Link to='cast'>Cast</Link></li>
-                        <li><Link to='reviews'>Reviews</Link></li>
-                    </ul>
-                </Container>
-            </Section>
+            {!response &&
+                <Section>
+                    <Container>
+                        <p>Additional information</p>
+                        <ul>
+                            <li><Link to='cast'>Cast</Link></li>
+                            <li><Link to='reviews'>Reviews</Link></li>
+                        </ul>
+                    </Container>
+                </Section>
             }
-            <Outlet />
+            <Suspense fallback={<Loader isLoad={true} />}>
+                <Outlet />
+            </Suspense>
             {response && <div> {response}</div>}
         </>
     return moveDetails
