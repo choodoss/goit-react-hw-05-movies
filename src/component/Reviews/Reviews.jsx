@@ -14,7 +14,7 @@ const Reviews = () => {
     useEffect(() => {
         getDataFilm(`movie/${filmId}/reviews`)
             .then(({ results }) => {
-                console.log(results)
+                console.log(review)
                 setState(results)
             }).catch(err => setResponseErr(err.toString()))
 
